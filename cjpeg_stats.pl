@@ -9,7 +9,7 @@ mozjpeg library.
 It tries to find the best compresssion by doing iterations and asking the user
 if he is satisfied of the result.
 
-Deps: feh, wmctrl, ImageMagick
+Deps: feh, wmctrl, rdjpgcom, ImageMagick
 =cut
 
 
@@ -112,16 +112,27 @@ sub check_change_extension {
 			exit 1;
 		}
 		else {
-			#TODO convert it to jpg with imagemagick `convert`
+			$new_file = "$dir$file.jpg";
+			system("convert $original $new_file");
 		}
 	}
 	return $new_file;
 }
 
 
+sub get_width_heigth {
+	my ($image_location) = @_;
+	my $output = qx#rdjpgcom -v $image_location#;
+	$output =~ m/(\d+)w \* (\d+)h/;
+	my $width = $1+0;
+	my $height = $2+0;
+	return ($width, $height);
+}
+
+
 exit unless (defined $ARGV[0] && -f -r -B $ARGV[0]);
 my $pic = "$ARGV[0]";
-check_change_extension($pic);
+$pic = check_change_extension($pic);
 compress($pic, 30);
 open_pic($pic);
 open_pic(get_compressed_file_name($pic,30));

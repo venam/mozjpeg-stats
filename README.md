@@ -17,4 +17,5 @@ if he is satisfied of the result.
 feh
 wmctrl
 imagemagick
+rdjpgcom
 ```
