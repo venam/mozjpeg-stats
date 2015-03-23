@@ -39,7 +39,7 @@ sub open_pic {
 	defined $child or die "$MINUS can't fork: $!\n";
 	unless ($child) {
 		#print "$^X\n";
-		exec "feh $pic";
+		exec qq#feh "$pic"#;
 	}
 	else {
 		push @children, $child;
@@ -85,8 +85,9 @@ sub compress {
 		print "$MINUS file name for compressed image already exist\n";
 		return;
 	}
-	my $command = qq# cjpeg -quality $ratio $original > $compressed_image_name  #;
+	my $command = qq# cjpeg -quality $ratio "$original" > "$compressed_image_name"  #;
 	print "$command\n";
+	exit;
 	system($command);
 }
 
@@ -115,7 +116,7 @@ sub check_change_extension {
 		}
 		else {
 			$new_file = "$dir$file.jpg";
-			system("convert $original $new_file");
+			system(qq#convert "$original" "$new_file"#);
 		}
 	}
 	return $new_file;
@@ -124,7 +125,7 @@ sub check_change_extension {
 
 sub get_width_heigth {
 	my ($image_location) = @_;
-	my $output = qx#rdjpgcom -v $image_location#;
+	my $output = qx#rdjpgcom -v "$image_location"#;
 	$output =~ m/(\d+)w \* (\d+)h/;
 	my $width = $1+0;
 	my $height = $2+0;
@@ -150,7 +151,7 @@ sub iterate {
 		my $answer = ask;
 		unless($answer) {
 			if(defined $before_last) {
-				system("rm $compressed"); 
+				system(qq#rm "$compressed"#); 
 			}
 			else {
 				$before_last = $compressed;
@@ -158,7 +159,7 @@ sub iterate {
 			last;
 		}
 		else {
-			system("rm $before_last") if (defined $before_last);
+			system(qq#rm "$before_last"#) if (defined $before_last);
 		}
 		$counter -= $jump;
 		$before_last = $compressed;
