@@ -138,18 +138,24 @@ sub iterate {
 	my $should_quit = 0;
 	my $counter = $start;
 	my $before_last;
+	my $compressed;
 	until ($should_quit) {
 		last if($counter < $end);
 
 		compress($original, $counter);
 		open_pic($original);
 		align_pic($original,0);
-		my $compressed = get_compressed_file_name($original, $counter);
+		$compressed = get_compressed_file_name($original, $counter);
 		open_pic($compressed);
 		align_pic($compressed,900);
 		my $answer = ask;
 		unless($answer) {
-			system("rm $compressed"); 
+			if(defined $before_last) {
+				system("rm $compressed"); 
+			}
+			else {
+				$before_last = $compressed;
+			}
 			last;
 		}
 		else {
@@ -160,6 +166,9 @@ sub iterate {
 		$counter -= $jump;
 		$before_last = $compressed;
 	}
+	#here save some information about the file in a very readable format
+	my ($width, $height) = get_width_heigth($before_last);
+	print "$INFO WIDTH: $width, HEIGHT:$height\n";
 }
 
 
