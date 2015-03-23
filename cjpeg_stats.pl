@@ -87,7 +87,6 @@ sub compress {
 	}
 	my $command = qq# cjpeg -quality $ratio "$original" > "$compressed_image_name"  #;
 	print "$command\n";
-	exit;
 	system($command);
 }
 
