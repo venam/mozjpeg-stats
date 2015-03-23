@@ -141,7 +141,6 @@ sub iterate {
 	my $compressed;
 	until ($should_quit) {
 		last if($counter < $end);
-
 		compress($original, $counter);
 		open_pic($original);
 		align_pic($original,0);
@@ -159,19 +158,17 @@ sub iterate {
 			last;
 		}
 		else {
-			if (defined $before_last) {
-				system("rm $before_last"); 
-			}
+			system("rm $before_last") if (defined $before_last);
 		}
 		$counter -= $jump;
 		$before_last = $compressed;
 	}
-	#here save some information about the file in a very readable format
 	my ($width, $height) = get_width_heigth($before_last);
+	#TODO: here save some information about the file in a very readable format
 	print "$INFO WIDTH: $width, HEIGHT:$height\n";
 }
 
 
-
 exit unless (defined $ARGV[0] && -f -r -B $ARGV[0]);
+#TODO: take the parameter as command line args
 iterate($ARGV[0], 95, 10, 5);
