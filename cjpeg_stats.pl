@@ -66,13 +66,15 @@ sub ask {
 	print "$INFO Is it a satisfying compression? [Y/N]\n";
 	print "$ARROW";
 	my $answer = <STDIN>;
+	clean_children;
 	if ($answer =~ /Y/i) {
 		print "$PLUS Your answer was positive. Trying with higher value\n";
+		return 1;
 	}
 	else {
 		print "$MINUS Your answer was negative. Using last best compression\n";
+		return 0;
 	}
-	clean_children;
 }
 
 
@@ -130,11 +132,26 @@ sub get_width_heigth {
 }
 
 
+sub iterate {
+	my ($original, $start, $end, $jump) = @_;
+	$original = check_change_extension($original);
+	my $should_quit = 0;
+	until ($should_quit) {
+		last if($start < $end);
+
+		compress($original, $start);
+		open_pic($original);
+		align_pic($original,0);
+		open_pic(get_compressed_file_name($original,$start));
+		align_pic(get_compressed_file_name($original,$start),900);
+		my $answer = ask;
+		last unless($answer);
+
+		$start -= $jump;
+	}
+}
+
+
+
 exit unless (defined $ARGV[0] && -f -r -B $ARGV[0]);
-my $pic = "$ARGV[0]";
-$pic = check_change_extension($pic);
-compress($pic, 30);
-open_pic($pic);
-open_pic(get_compressed_file_name($pic,30));
-align_pic($pic, 500);
-ask;
+iterate($ARGV[0], 95, 10, 5);
