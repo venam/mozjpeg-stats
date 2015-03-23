@@ -136,18 +136,29 @@ sub iterate {
 	my ($original, $start, $end, $jump) = @_;
 	$original = check_change_extension($original);
 	my $should_quit = 0;
+	my $counter = $start;
+	my $before_last;
 	until ($should_quit) {
-		last if($start < $end);
+		last if($counter < $end);
 
-		compress($original, $start);
+		compress($original, $counter);
 		open_pic($original);
 		align_pic($original,0);
-		open_pic(get_compressed_file_name($original,$start));
-		align_pic(get_compressed_file_name($original,$start),900);
+		my $compressed = get_compressed_file_name($original, $counter);
+		open_pic($compressed);
+		align_pic($compressed,900);
 		my $answer = ask;
-		last unless($answer);
-
-		$start -= $jump;
+		unless($answer) {
+			system("rm $compressed"); 
+			last;
+		}
+		else {
+			if (defined $before_last) {
+				system("rm $before_last"); 
+			}
+		}
+		$counter -= $jump;
+		$before_last = $compressed;
 	}
 }
 
