@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 use warnings;
 use strict;
 
@@ -133,7 +134,7 @@ sub get_width_heigth {
 
 
 sub iterate {
-	my ($original, $start, $end, $jump) = @_;
+	my ($original, $start, $end, $jump, $log_file) = @_;
 	$original = check_change_extension($original);
 	my $should_quit = 0;
 	my $counter = $start;
@@ -160,15 +161,19 @@ sub iterate {
 		else {
 			system(qq#rm "$before_last"#) if (defined $before_last);
 		}
-		$counter -= $jump;
+		$counter += $jump;
 		$before_last = $compressed;
 	}
+	$counter -= $jump;
 	my ($width, $height) = get_width_heigth($before_last);
 	#TODO: here save some information about the file in a very readable format
-	print "$INFO WIDTH: $width, HEIGHT:$height\n";
+	print "$INFO WIDTH: $width, HEIGHT:$height COMPRESSION:$counter\n";
+	open(my $fh, ">", $log_file) or die $!;
+	print $fh "WIDTH:$width,HEIGHT:$height,COMPRESSION:$counter\n";
+	close $fh;
 }
 
 
 exit unless (defined $ARGV[0] && -f -r -B $ARGV[0]);
 #TODO: take the parameter as command line args
-iterate($ARGV[0], 95, 10, 5);
+iterate($ARGV[0], 95, 10, 5, "log.txt");
