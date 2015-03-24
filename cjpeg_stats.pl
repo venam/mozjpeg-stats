@@ -168,7 +168,7 @@ sub iterate {
 	my ($width, $height) = get_width_heigth($before_last);
 	#TODO: here save some information about the file in a very readable format
 	print "$INFO WIDTH: $width, HEIGHT:$height COMPRESSION:$counter\n";
-	open(my $fh, ">", $log_file) or die $!;
+	open(my $fh, ">>", $log_file) or die $!;
 	print $fh "WIDTH:$width,HEIGHT:$height,COMPRESSION:$counter\n";
 	close $fh;
 }
