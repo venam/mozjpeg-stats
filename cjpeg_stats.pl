@@ -161,10 +161,10 @@ sub iterate {
 		else {
 			system(qq#rm "$before_last"#) if (defined $before_last);
 		}
-		$counter += $jump;
+		$counter -= $jump;
 		$before_last = $compressed;
 	}
-	$counter -= $jump;
+	$counter += $jump;
 	my ($width, $height) = get_width_heigth($before_last);
 	#TODO: here save some information about the file in a very readable format
 	print "$INFO WIDTH: $width, HEIGHT:$height COMPRESSION:$counter\n";
