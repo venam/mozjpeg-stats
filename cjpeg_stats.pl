@@ -39,7 +39,7 @@ sub open_pic {
 	defined $child or die "$MINUS can't fork: $!\n";
 	unless ($child) {
 		#print "$^X\n";
-		exec qq#feh "$pic"#;
+		exec "feh", $pic;
 	}
 	else {
 		push @children, $child;
@@ -50,7 +50,7 @@ sub open_pic {
 sub clean_children {
 	while (@children) {
 		my $child = pop @children;
-		kill "KILL", $child;
+		kill 'KILL', $child;
 	}
 }
 
