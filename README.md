@@ -14,6 +14,7 @@ if he is satisfied of the result.
 #Dependencies
 
 ```
+mozjpeg
 feh
 wmctrl
 imagemagick

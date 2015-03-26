@@ -107,7 +107,7 @@ sub check_change_extension {
 	my ($original) = @_;
 	my $new_file = $original;
 	my @allexts = qw( .targa .bmp .ppm .jpg .jpeg .gif .jpx .jb2 .ico .png .psd .pspimage .thm .tif .yuv );
-	my @exts = @allexts[0..4];
+	my @exts = qw( .jpg .jpeg );
 	my ($dir, $file, $ext) = get_info_about_file($original);
 	if (!grep (/$ext/i, @exts)){
 		if (! grep (/$ext/i, @allexts)) {
@@ -167,13 +167,50 @@ sub iterate {
 	$counter += $jump;
 	my ($width, $height) = get_width_heigth($before_last);
 	#TODO: here save some information about the file in a very readable format
-	print "$INFO WIDTH: $width, HEIGHT:$height COMPRESSION:$counter\n";
+	print "$INFO WIDTH: $width,HEIGHT:$height,COMPRESSION:$counter\n";
 	open(my $fh, ">>", $log_file) or die $!;
 	print $fh "WIDTH:$width,HEIGHT:$height,COMPRESSION:$counter\n";
 	close $fh;
 }
 
 
-exit unless (defined $ARGV[0] && -f -r -B $ARGV[0]);
+sub find_best_start {
+	my ($img, $log_file, $treshold) = @_;
+	my ($width,$height) = get_width_heigth($img);
+	my $total = $width*$height;
+	open(my $fh, "<", $log_file) or die $!;
+	my @close;
+
+	for (<$fh>) {
+		my ($w,$h,$c) = $_ =~ m/WIDTH:(\d+),HEIGHT:(\d+),COMPRESSION:(\d+)/;
+		push(@close,$c) if (abs ($w*$h - $total) <= $treshold);
+	}
+	unless (scalar(@close) == 0) {
+		my $average_compression = 0;
+		$average_compression+= $_ for (@close);
+		$average_compression /= scalar(@close);
+		$average_compression += 5;
+		print "$INFO using a related average compression of: $average_compression\n";
+		return $average_compression;
+	}
+	else {
+		return 95;
+	}
+}
+
+
+sub help {
+	print
+<<HELP
+Usage: $0 [image]
+HELP
+;
+	exit 0;
+}
+
+
+help() unless (defined $ARGV[0] && -f -r -B $ARGV[0]);
 #TODO: take the parameter as command line args
-iterate($ARGV[0], 95, 10, 5, "log.txt");
+my $img = check_change_extension($ARGV[0]);
+my $approx_start = find_best_start($img, "log.txt", 30);
+iterate($img, $approx_start, 10, 5, "log.txt");
