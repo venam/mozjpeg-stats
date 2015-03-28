@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 use warnings;
 use strict;
+use Getopt::Std;
+use Data::Dumper;
 
 
 =head1
@@ -202,15 +204,32 @@ sub find_best_start {
 sub help {
 	print
 <<HELP
-Usage: $0 [image]
+Usage: $0 [options] -i [image]
+
+-h                Print this help message
+-i [image]        Use the image specified
+-s [int]          Start compression (default:95)
+-e [int]          End compression   (default:10)
+-j [int]          Jump between compressions (default:5)
+-l [log_file]     Use log_file as log file otherwise uses "log.txt"
+-b                Try to use the best compression from log file
+-t [int]          Treshold for finding best start (default:30)
 HELP
 ;
 	exit 0;
 }
 
 
-help() unless (defined $ARGV[0] && -f -r -B $ARGV[0]);
-#TODO: take the parameter as command line args
-my $img = check_change_extension($ARGV[0]);
-my $approx_start = find_best_start($img, "log.txt", 30);
-iterate($img, $approx_start, 10, 5, "log.txt");
+my %opts;
+getopts('hbs:e:j:l:i:t:', \%opts);
+help() if (defined $opts{h});
+help() unless (defined($opts{i}) || (defined $opts{i} && -f -r -B $opts{i}));
+my $img = check_change_extension($opts{i});
+my $start = (defined $opts{s}) ? $opts{s} : 95;
+my $end = (defined $opts{e}) ? $opts{e} : 10;
+my $jump = (defined $opts{j}) ? $opts{j} : 5;
+my $log = (defined $opts{l}) ? $opts{l} : "log.txt";
+my $treshold = (defined $opts{t}) ? $opts{t} : 30;
+$start = find_best_start($img, $log, $treshold) if(defined $opts{b});
+
+iterate($img, $start, $end, $jump, $log);
